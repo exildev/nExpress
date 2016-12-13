@@ -3,113 +3,125 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <LinearLayout
+        android:baselineAligned="false"
         android:id="@+id/linear_layout"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="#fff"
+        android:orientation="horizontal">
+
         <RelativeLayout
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:padding="16dp">
+
             <android.support.v7.widget.CardView
                 android:id="@+id/pedido_icon_card"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
-                app:cardBackgroundColor="#757575"
+                app:cardBackgroundColor="#b2b2b2"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="0dp">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+
                     <ImageView
                         android:id="@+id/pedido_icon"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
-                        android:src="@drawable/ic_build"
-                        android:scaleType="centerInside"/>
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_motorcycle_24dp"
+                        android:contentDescription="@string/icono" />
                 </RelativeLayout>
             </android.support.v7.widget.CardView>
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/container"
             android:layout_width="0dp"
             android:layout_height="72dp"
             android:layout_weight="1"
             android:background="@drawable/border_set">
-            <RelativeLayout
+
+            <LinearLayout
                 android:id="@+id/title"
                 android:layout_width="match_parent"
-                android:layout_marginRight="72dp"
-                android:layout_height="72dp">
-                <LinearLayout
+                android:layout_height="72dp"
+                android:layout_marginEnd="72dp"
+                android:layout_alignParentStart="true"
+                android:animateLayoutChanges="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/cliente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentLeft="true"
-                    android:paddingRight="16dp"
-                    android:orientation="vertical"
-                    android:animateLayoutChanges="true">
-                    <TextView
-                        android:id="@+id/cliente"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:paddingBottom="4dp"
-                        android:textColor="#000"
-                        android:text="Two-line-item"/>
-                    <TextView
-                        android:id="@+id/direccion_subtitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="visible"
-                        android:text="Secondary text"/>
-                </LinearLayout>
-            </RelativeLayout>
+                    android:paddingBottom="4dp"
+                    android:text="Two-line-item"
+                    android:textColor="#000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/direccion_subtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:paddingTop="4dp"
+                    android:text="Secondary text"
+                    android:textSize="13sp"
+                    android:visibility="visible" />
+            </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:padding="16dp">
+
                 <ImageView
                     android:id="@+id/drop_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/ic_done"
-                    android:scaleType="fitCenter"/>
+                    android:contentDescription="@string/icono"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_keyboard_arrow_down" />
             </RelativeLayout>
+
             <LinearLayout
                 android:id="@+id/details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/title"
                 android:orientation="vertical"
-                android:paddingBottom="8dp"
-                android:layout_below="@+id/title">
+                android:paddingBottom="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/other_border"
-                    android:paddingBottom="4dp"
-                    >
+                    android:paddingBottom="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Direccion:"
                         android:textColor="#000"
-                        android:text="Direccion:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/direccion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="Calle falsa 123"/>
+                        android:layout_marginStart="4dp"
+                        android:text="Calle falsa 123" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -117,20 +129,21 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/border_set"
                     android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    >
+                    android:paddingTop="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Telefono:"
                         android:textColor="#000"
-                        android:text="Telefono:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/telefono"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="6443434"/>
+                        android:layout_marginStart="4dp"
+                        android:text="6443434" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -138,60 +151,65 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/border_set"
                     android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    >
+                    android:paddingTop="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Celular:"
                         android:textColor="#000"
-                        android:text="Celular:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/celular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="3014444070"/>
+                        android:layout_marginStart="4dp"
+                        android:text="3014444070" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/border_set"
                     android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    >
+                    android:paddingTop="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Tienda:"
                         android:textColor="#000"
-                        android:text="Tienda:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/tienda"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="Olimpica 24H"/>
+                        android:layout_marginStart="4dp"
+                        android:text="Olimpica 24H" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/border_set"
                     android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    >
+                    android:paddingTop="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Direccion tienda:"
                         android:textColor="#000"
-                        android:text="Direccion tienda:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/direccion_tienda"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="Calle falsa #123"/>
+                        android:layout_marginStart="4dp"
+                        android:text="Calle falsa #123" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -199,50 +217,59 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/border_set"
                     android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    >
+                    android:paddingTop="4dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:text="Total:"
                         android:textColor="#000"
-                        android:text="Total:"/>
+                        android:textSize="16sp" />
+
                     <TextView
                         android:id="@+id/total"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="$124.000"/>
+                        android:layout_marginStart="4dp"
+                        android:text="$124.000" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="right"
-                    android:paddingTop="8dp"
-                    android:paddingRight="16dp">
+                    android:gravity="end"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp">
+
                     <Button
                         android:id="@+id/negative_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:theme="@style/AppTheme.ErrorButton"
-                        android:text="Cancelar"/>
+                        android:layout_gravity="end"
+                        android:text="Cancelar"
+                        android:theme="@style/AppTheme.ErrorButton" />
+
                     <Button
                         android:id="@+id/positive_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
-                        android:theme="@style/AppTheme.OkButton"
-                        android:text="Aceptar"/>
+                        android:text="Aceptar"
+                        android:theme="@style/AppTheme.OkButton" />
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
-    <Button
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/button_expand"
         android:layout_width="match_parent"
         android:layout_height="72dp"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:onClick="showData"
-        android:visibility="visible"/>
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="action"
+        app:cardBackgroundColor="#00000000"
+        app:cardElevation="0dp"
+        app:cardCornerRadius="0dp" />
 </RelativeLayout>

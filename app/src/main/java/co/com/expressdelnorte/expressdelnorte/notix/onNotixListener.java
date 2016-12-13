@@ -1,0 +1,15 @@
+package co.com.expressdelnorte.expressdelnorte.notix;
+
+import org.json.JSONObject;
+
+
+public interface onNotixListener {
+
+    void onNotix(JSONObject data);
+
+    void onNumeroPedido(JSONObject data);
+
+    void onAsignarPedido(JSONObject data);
+
+    void onVisited(JSONObject data);
+}
