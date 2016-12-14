@@ -3,7 +3,7 @@ package co.com.expressdelnorte.expressdelnorte.models;
 
 public class Pedido {
     private int id;
-    private String tipo;
+    private int tipo;
     private String estado;
     private String direccion;
     private String clienteNombre;
@@ -13,6 +13,7 @@ public class Pedido {
     private String tienda;
     private String direccionTienda;
     private String total;
+    private String message_id;
 
     public Pedido(String total, String direccionTienda, String tienda, String celular, String telefono, String clienteApellidos, String clienteNombre, String direccion) {
         this.total = total;
@@ -41,11 +42,11 @@ public class Pedido {
         this.id = id;
     }
 
-    public String getTipo() {
+    public int getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(int tipo) {
         this.tipo = tipo;
     }
 
@@ -112,6 +113,14 @@ public class Pedido {
         this.total = total;
     }
 
+    public String getMessage_id() {
+        return message_id;
+    }
+
+    public void setMessage_id(String message_id) {
+        this.message_id = message_id;
+    }
+
     @Override
     public String toString() {
         return "Pedido{" +
@@ -136,15 +145,14 @@ public class Pedido {
 
         Pedido pedido = (Pedido) o;
 
-        if (id != pedido.id) return false;
-        return tipo.equals(pedido.tipo);
+        return id == pedido.id && tipo == pedido.tipo;
 
     }
 
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + tipo.hashCode();
+        result = 31 * result + tipo;
         return result;
     }
 }

@@ -147,6 +147,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     @Override
     public void onLocationChanged(Location location) {
+        if (NotixFactory.notifications.size() < 1) {
+            stopSelf();
+            return;
+        }
         notix.sendGPS(location.getLatitude(), location.getLongitude());
     }
 }

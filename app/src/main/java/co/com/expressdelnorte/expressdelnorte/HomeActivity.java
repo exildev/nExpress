@@ -2,18 +2,23 @@ package co.com.expressdelnorte.expressdelnorte;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -29,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -58,11 +64,18 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 3;
     private static final int REQUEST_LOCATION_SETTINGS = 12;
+    private static final int REQUEST_PCITURE = 6;
 
     private Notix notix;
     private String nPedidos;
     private InfiniteListView infiniteListView;
     private GoogleApiClient mGoogleClient;
+
+    private Uri mPhotoUri;
+    private Pedido delivering = null;
+    private boolean isCancelling;
+
+    private MaterialDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +157,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     holder = (ViewHolder) convertView.getTag();
                 }
 
-                Pedido pedido = NotixFactory.notifications.get(position);
+                final Pedido pedido = NotixFactory.notifications.get(position);
 
                 if (pedido != null) {
                     holder.cliente.setText(pedido.getClienteNombre());
@@ -155,11 +168,51 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     holder.tienda.setText(pedido.getTienda());
                     holder.direccionTienda.setText(pedido.getDireccionTienda());
                     holder.total.setText(pedido.getTotal());
-                    if (pedido.getEstado().equals("asignado")) {
-                        holder.positiveButton.setText(R.string.recogido);
-                        holder.negativeButton.setText(R.string.cancelar);
-                    } else {
-                        holder.dropImage.setVisibility(View.INVISIBLE);
+                    holder.negativeButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            delivering = pedido;
+                            isCancelling = true;
+                            mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    new ContentValues());
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+                            startActivityForResult(intent, REQUEST_PCITURE);
+                        }
+                    });
+                    switch (pedido.getEstado()) {
+                        case "asignado":
+                        case "aceptado":
+                            holder.positiveButton.setText(R.string.recogido);
+                            holder.negativeButton.setText(R.string.cancelar);
+                            holder.positiveButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    notix.recojer(pedido);
+                                }
+                            });
+                            break;
+                        case "recogido":
+                            holder.positiveButton.setText(R.string.entregado);
+                            holder.negativeButton.setText(R.string.cancelar);
+                            holder.positiveButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    delivering = pedido;
+                                    isCancelling = false;
+                                    mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                            new ContentValues());
+                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+                                    startActivityForResult(intent, REQUEST_PCITURE);
+                                }
+                            });
+                            break;
+                        default:
+                            holder.positiveButton.setText(R.string.aceptar);
+                            holder.negativeButton.setText(R.string.rechazar);
+                            break;
                     }
                 }
 
@@ -182,14 +235,20 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         String tiendaNombre = tienda.getString("referencia");
         String direccionTienda = tienda.getString("direccion");
         String total = NumberFormat.getCurrencyInstance().format(message.get("total"));
-        String tipo = String.valueOf(message.getInt("tipo"));
-        String estado = message.getString("estado");
+        String message_id = message.getString("message_id");
+        int tipo = message.getInt("tipo");
+        String estado = "asignado";
+        if (message.has("estado")) {
+            estado = message.getString("estado");
+        }
+
         int id = message.getInt("id");
 
         Pedido pedido = new Pedido(total, direccionTienda, tiendaNombre, celular, telefono, apellidos, nombre, direccion);
         pedido.setId(id);
         pedido.setTipo(tipo);
         pedido.setEstado(estado);
+        pedido.setMessage_id(message_id);
         return pedido;
     }
 
@@ -411,9 +470,15 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     }
 
     @Override
+    public void onDelete() {
+        setInfiniteList();
+        loading.dismiss();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_LOCATION_SETTINGS) {
-            Log.i("GPS", "" + (resultCode == Activity.RESULT_OK));
+            Log.i("GPS", "" + (resultCode == RESULT_OK));
             switch (resultCode) {
                 case Activity.RESULT_OK:
                     break;
@@ -435,8 +500,33 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     alert.show();
                     break;
             }
+        } else if (requestCode == REQUEST_PCITURE && resultCode == RESULT_OK) {
+            if (isCancelling) {
+                notix.cancelar(delivering, getRealPathFromURI(mPhotoUri), this);
+            } else {
+                notix.entregar(delivering, getRealPathFromURI(mPhotoUri), this);
+            }
+            Log.i("isCancelling", isCancelling + "");
+            Log.i("picture", getRealPathFromURI(mPhotoUri));
+            Log.i("pedido", delivering.toString());
+            loading = new MaterialDialog.Builder(this)
+                    .title("Subiendo imagen")
+                    .content("Por favor espere")
+                    .progress(true, 0)
+                    .show();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        CursorLoader loader = new CursorLoader(this, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
     }
 
     static class ViewHolder {

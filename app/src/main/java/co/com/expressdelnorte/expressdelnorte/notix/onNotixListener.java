@@ -12,4 +12,6 @@ public interface onNotixListener {
     void onAsignarPedido(JSONObject data);
 
     void onVisited(JSONObject data);
+
+    void onDelete();
 }

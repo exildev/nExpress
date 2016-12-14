@@ -14,14 +14,24 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.ServerResponse;
+import net.gotev.uploadservice.UploadInfo;
+import net.gotev.uploadservice.UploadNotificationConfig;
+import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
+import net.gotev.uploadservice.UploadStatusDelegate;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import co.com.expressdelnorte.expressdelnorte.VolleySingleton;
+import co.com.expressdelnorte.expressdelnorte.models.Pedido;
 
 
 public class Notix {
@@ -201,7 +211,6 @@ public class Notix {
     }
 
     private void sendMessages() {
-        Log.i("sendMessages", messages.size() + "");
         if (messages == null) {
             messages = new ArrayList<>();
             return;
@@ -231,6 +240,130 @@ public class Notix {
         }
     }
 
+    public void recojer(Pedido pedido) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("pedido_id", pedido.getId());
+            message.put("tipo", pedido.getTipo());
+            message.put("cell_id", django_id);
+            emitMessage("recojer-pedido", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void entregar(final Pedido pedido, String photo, Context context) {
+        UploadNotificationConfig notificationConfig = new UploadNotificationConfig()
+                .setTitle("Subiendo solucion")
+                .setInProgressMessage("Subiendo solucion a [[UPLOAD_RATE]] ([[PROGRESS]])")
+                .setErrorMessage("Hubo un error al subir la solucion")
+                .setCompletedMessage("Subida completada exitosamente en [[ELAPSED_TIME]]")
+                .setAutoClearOnSuccess(true);
+        String url = "http://104.236.33.228:4000/upload";
+        try {
+            String uploadId =
+                    new MultipartUploadRequest(context, url)
+                            .setNotificationConfig(notificationConfig)
+                            .setAutoDeleteFilesAfterSuccessfulUpload(true)
+                            .setMaxRetries(1)
+                            .addParameter("django_id", django_id)
+                            .addParameter("usertype", "CELL")
+                            .addParameter("pedido", pedido.getId() + "")
+                            .addParameter("tipo", pedido.getTipo() + "")
+                            .addFileToUpload(photo, "confirmacion")
+                            .setDelegate(new UploadStatusDelegate() {
+                                @Override
+                                public void onProgress(UploadInfo uploadInfo) {
+
+                                }
+
+                                @Override
+                                public void onError(UploadInfo uploadInfo, Exception exception) {
+                                }
+
+                                @Override
+                                public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                                    Log.i("upload", serverResponse.getBodyAsString());
+                                    try {
+                                        JSONObject message = new JSONObject();
+                                        message.put("message_id", pedido.getMessage_id());
+                                        Log.i("deleting", message.toString());
+                                        emitMessage("delete-message", message);
+                                        NotixFactory.notifications.remove(pedido);
+                                        notixListener.onDelete();
+                                        getNumeroPedido();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(UploadInfo uploadInfo) {
+
+                                }
+                            })
+                            .startUpload();
+        } catch (MalformedURLException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelar(final Pedido pedido, String photo, Context context) {
+        UploadNotificationConfig notificationConfig = new UploadNotificationConfig()
+                .setTitle("Subiendo solucion")
+                .setInProgressMessage("Subiendo solucion a [[UPLOAD_RATE]] ([[PROGRESS]])")
+                .setErrorMessage("Hubo un error al subir la solucion")
+                .setCompletedMessage("Subida completada exitosamente en [[ELAPSED_TIME]]")
+                .setAutoClearOnSuccess(true);
+        String url = "http://104.236.33.228:4000/cancel";
+        try {
+            String uploadId =
+                    new MultipartUploadRequest(context, url)
+                            .setNotificationConfig(notificationConfig)
+                            .setAutoDeleteFilesAfterSuccessfulUpload(true)
+                            .setMaxRetries(1)
+                            .addParameter("django_id", django_id)
+                            .addParameter("usertype", "CELL")
+                            .addParameter("pedido", pedido.getId() + "")
+                            .addParameter("tipo", pedido.getTipo() + "")
+                            .addFileToUpload(photo, "confirmacion")
+                            .setDelegate(new UploadStatusDelegate() {
+                                @Override
+                                public void onProgress(UploadInfo uploadInfo) {
+
+                                }
+
+                                @Override
+                                public void onError(UploadInfo uploadInfo, Exception exception) {
+                                }
+
+                                @Override
+                                public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                                    Log.i("upload", serverResponse.getBodyAsString());
+                                    try {
+                                        JSONObject message = new JSONObject();
+                                        message.put("message_id", pedido.getMessage_id());
+                                        Log.i("deleting", message.toString());
+                                        emitMessage("delete-message", message);
+                                        NotixFactory.notifications.remove(pedido);
+                                        notixListener.onDelete();
+                                        getNumeroPedido();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(UploadInfo uploadInfo) {
+
+                                }
+                            })
+                            .startUpload();
+        } catch (MalformedURLException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void emitMessage(String emit, JSONObject message) {
         messages.add(new Message(emit, message));
         try {
@@ -246,6 +379,7 @@ public class Notix {
     private Emitter.Listener onIdentify = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            Log.i("onIdentify", "triggered");
             final JSONObject message = (JSONObject) args[0];
             if (!message.has("ID")) {
                 login();
@@ -290,6 +424,7 @@ public class Notix {
     private Emitter.Listener onSuccesLogin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            Log.i("onSuccesLogin", "triggered");
             sendMessages();
         }
     };
@@ -297,6 +432,7 @@ public class Notix {
     private Emitter.Listener onErrorLogin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            Log.i("onErrorLogin", "triggered");
             Log.i("Error", "Hubo un error en el servidor");
         }
     };
