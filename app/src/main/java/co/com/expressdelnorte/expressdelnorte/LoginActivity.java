@@ -60,6 +60,8 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
             hideKeyboard();
             bigAvatar();
             final Handler handler = new Handler();
+            TextView passwordView = (TextView) findViewById(R.id.password);
+            passwordView.setText(password);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {

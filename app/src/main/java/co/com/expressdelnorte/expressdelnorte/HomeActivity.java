@@ -441,10 +441,11 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     public void onAsignarPedido(JSONObject data) {
         final JSONObject message = data;
         Log.i("pedido", data.toString());
-        HomeActivity.this.runOnUiThread(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    NotixFactory.buildNotification(HomeActivity.this);
                     notix.visitMessage(message);
                     Pedido pedido = formatPedido(message);
                     int pedidoIndex = NotixFactory.notifications.indexOf(pedido);

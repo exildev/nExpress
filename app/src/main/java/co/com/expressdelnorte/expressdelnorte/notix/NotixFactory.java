@@ -17,6 +17,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import co.com.expressdelnorte.expressdelnorte.HomeActivity;
+import co.com.expressdelnorte.expressdelnorte.R;
 import co.com.expressdelnorte.expressdelnorte.models.Pedido;
 
 
@@ -32,37 +34,19 @@ public class NotixFactory {
         return notix;
     }
 
-    public static void buildNotification(Context context, JSONObject notification) {
-        /*notifications.add(notification);
-        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_logo);
+    public static void buildNotification(Context context) {
+        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_notification);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_logo_outline)
+                .setSmallIcon(R.drawable.ic_motorcycle_24dp)
                 .setLargeIcon(largeIcon)
-                .setContentTitle("Piscix")
-                .setContentText(notifications.size() + " notificaciones sin leer");
-        NotificationCompat.InboxStyle inboxStyle =
-                new NotificationCompat.InboxStyle();
+                .setContentTitle("Express del norte")
+                .setContentText("Tienes un nuevo domicilio por entregar");
 
-        inboxStyle.setBigContentTitle("Notificaciones Piscix");
-        for (int i = 0; i < 5 && i < notifications.size(); i++) {
-            JSONObject event = notifications.get(i);
-            try {
-                Log.i("html", event.getString("html"));
-                inboxStyle.addLine(event.getString("html"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        if (notifications.size() > 5) {
-            inboxStyle.setSummaryText("+" + (notifications.size() - 5) + " mas");
-        }
-
-        mBuilder.setStyle(inboxStyle);
         mBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
         mBuilder.setVibrate(new long[]{0, 800, 100, 800});
         mBuilder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
 
-        Intent resultIntent = new Intent(context, NotificationActivity.class);
+        Intent resultIntent = new Intent(context, HomeActivity.class);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         // Adds the Intent that starts the Activity to the top of the stack
@@ -78,6 +62,6 @@ public class NotixFactory {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
-        mNotificationManager.notify(12, mBuilder.build());*/
+        mNotificationManager.notify(12, mBuilder.build());
     }
 }
