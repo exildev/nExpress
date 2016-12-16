@@ -446,7 +446,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
             public void run() {
                 try {
                     notix.visitMessage(message);
-
                     Pedido pedido = formatPedido(message);
                     int pedidoIndex = NotixFactory.notifications.indexOf(pedido);
                     if (pedidoIndex < 0) {
@@ -457,6 +456,9 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                         setInfiniteList();
                     }
                     Log.i("pedido", message.toString());
+
+                    findViewById(R.id.no_items).setVisibility(View.GONE);
+                    infiniteListView.setVisibility(View.VISIBLE);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -473,6 +475,10 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     public void onDelete() {
         setInfiniteList();
         loading.dismiss();
+        if (NotixFactory.notifications.size() < 1) {
+            findViewById(R.id.no_items).setVisibility(View.VISIBLE);
+            infiniteListView.setVisibility(View.GONE);
+        }
     }
 
     @Override
