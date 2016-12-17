@@ -2,6 +2,7 @@ package co.com.expressdelnorte.expressdelnorte;
 
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.Notification;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -139,7 +140,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     convertView = getLayoutInflater().inflate(R.layout.pedido, parent, false);
 
                     holder = new ViewHolder();
-                    holder.button_expand = (CardView) convertView.findViewById(R.id.button_expand);
+                    holder.button_expand = convertView.findViewById(R.id.button_expand);
                     holder.cliente = (TextView) convertView.findViewById(R.id.cliente);
                     holder.direccionSubtitle = (TextView) convertView.findViewById(R.id.direccion_subtitle);
                     holder.direccion = (TextView) convertView.findViewById(R.id.direccion);
@@ -223,7 +224,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         infiniteListView.setAdapter(adapter);
     }
 
-    private Pedido formatPedido(JSONObject message) throws JSONException {
+    static Pedido formatPedido(JSONObject message) throws JSONException {
         JSONObject cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
         JSONObject tienda = ((JSONArray) message.get("tienda")).getJSONObject(0);
 
@@ -379,6 +380,26 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     }
 
     @Override
+    protected void onPause() {
+        Log.i("HomeActivity", "onPause");
+        NotificationService.startService(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i("HomeActivity", "onDestroy");
+        NotificationService.startService(this);
+        super.onDestroy();
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION || requestCode == PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION) {
@@ -430,6 +451,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         try {
             notix.deleteMessage(data);
             nPedidos = data.get("numero_pedidos").toString();
+            Log.i("pedido", nPedidos);
             Snackbar.make(findViewById(R.id.fab), "Has entregado " + nPedidos + " pedidos esta quincena", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         } catch (JSONException e) {
@@ -445,7 +467,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
             @Override
             public void run() {
                 try {
-                    NotixFactory.buildNotification(HomeActivity.this);
                     notix.visitMessage(message);
                     Pedido pedido = formatPedido(message);
                     int pedidoIndex = NotixFactory.notifications.indexOf(pedido);
@@ -537,7 +558,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     }
 
     static class ViewHolder {
-        CardView button_expand;
+        View button_expand;
         TextView cliente;
         TextView direccionSubtitle;
         TextView direccion;

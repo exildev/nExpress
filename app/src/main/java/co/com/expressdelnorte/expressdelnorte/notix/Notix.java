@@ -177,10 +177,11 @@ public class Notix {
         try {
             JSONObject msg = new JSONObject();
             msg.put("django_id", django_id);
-            msg.put("usertype", "WEB");
+            msg.put("usertype", "CELL");
             msg.put("webuser", username);
             msg.put("password", SOCKET_PASSWORD);
             msg.put("username", SOCKET_USERNAME);
+            Log.i("login", msg.toString());
             mSocket.emit("login", msg);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -381,6 +382,7 @@ public class Notix {
         public void call(Object... args) {
             Log.i("onIdentify", "triggered");
             final JSONObject message = (JSONObject) args[0];
+            Log.i("onIdentify", message.toString());
             if (!message.has("ID")) {
                 login();
             } else {

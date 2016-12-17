@@ -40,7 +40,7 @@ public class NotixFactory {
                 .setSmallIcon(R.drawable.ic_motorcycle_24dp)
                 .setLargeIcon(largeIcon)
                 .setContentTitle("Express del norte")
-                .setContentText("Tienes un nuevo domicilio por entregar");
+                .setContentText("Tienes domicilios pendientes por entregar");
 
         mBuilder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
         mBuilder.setVibrate(new long[]{0, 800, 100, 800});
