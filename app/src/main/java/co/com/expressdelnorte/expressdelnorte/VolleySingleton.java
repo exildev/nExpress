@@ -14,15 +14,13 @@ import java.net.URI;
 import java.util.List;
 
 
-public class VolleySingleton {
+class VolleySingleton {
     private static VolleySingleton mInstance;
     private RequestQueue mRequestQueue;
-    private static Context mCtx;
     private CookieManager cookieManager;
 
     private VolleySingleton(Context context) {
-        mCtx = context;
-        mRequestQueue = getRequestQueue();
+        mRequestQueue = getRequestQueue(context.getApplicationContext());
     }
 
     public static synchronized VolleySingleton getInstance(Context context) {
@@ -32,18 +30,18 @@ public class VolleySingleton {
         return mInstance;
     }
 
-    private RequestQueue getRequestQueue() {
+    private RequestQueue getRequestQueue(Context context) {
         if (mRequestQueue == null) {
             cookieManager = new CookieManager();
             CookieHandler.setDefault(cookieManager);
 
-            mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
+            mRequestQueue = Volley.newRequestQueue(context);
         }
         return mRequestQueue;
     }
 
-    public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+    public <T> void addToRequestQueue(Request<T> req, Context context) {
+        getRequestQueue(context).add(req);
     }
 
     void cancelAll() {

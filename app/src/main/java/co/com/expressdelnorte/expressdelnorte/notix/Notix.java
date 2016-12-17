@@ -5,11 +5,6 @@ import android.content.Context;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -18,7 +13,6 @@ import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.ServerResponse;
 import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
-import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
 import net.gotev.uploadservice.UploadStatusDelegate;
 
 import org.json.JSONArray;
@@ -30,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import co.com.expressdelnorte.expressdelnorte.VolleySingleton;
 import co.com.expressdelnorte.expressdelnorte.models.Pedido;
 
 
@@ -52,7 +45,7 @@ public class Notix {
         initSocket();
     }
 
-    public static Notix getInstance() {
+    static Notix getInstance() {
         if (instance == null) {
             instance = new Notix();
         }
@@ -66,10 +59,6 @@ public class Notix {
 
     public void setAuthListener(AuthListener authListener) {
         this.authListener = authListener;
-    }
-
-    public boolean isConnected() {
-        return mSocket.connected();
     }
 
     private void initSocket() {
@@ -120,20 +109,6 @@ public class Notix {
             msg.put("message_id", message.get("message_id"));
             msg.put("emit", message.get("emit"));
             emitMessage("visit-message", msg);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void visitMessages(ArrayList<String> messages) {
-        JSONArray messages_id = new JSONArray(messages);
-        Log.i("visit", messages_id.toString());
-        try {
-            JSONObject msg = new JSONObject();
-            msg.put("webuser", username);
-            msg.put("type", type);
-            msg.put("messages_id", messages_id);
-            emitMessage("visited", msg);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -262,48 +237,47 @@ public class Notix {
                 .setAutoClearOnSuccess(true);
         String url = "http://104.236.33.228:4000/upload";
         try {
-            String uploadId =
-                    new MultipartUploadRequest(context, url)
-                            .setNotificationConfig(notificationConfig)
-                            .setAutoDeleteFilesAfterSuccessfulUpload(true)
-                            .setMaxRetries(1)
-                            .addParameter("django_id", django_id)
-                            .addParameter("usertype", "CELL")
-                            .addParameter("pedido", pedido.getId() + "")
-                            .addParameter("tipo", pedido.getTipo() + "")
-                            .addFileToUpload(photo, "confirmacion")
-                            .setDelegate(new UploadStatusDelegate() {
-                                @Override
-                                public void onProgress(UploadInfo uploadInfo) {
+            new MultipartUploadRequest(context, url)
+                    .setNotificationConfig(notificationConfig)
+                    .setAutoDeleteFilesAfterSuccessfulUpload(true)
+                    .setMaxRetries(1)
+                    .addParameter("django_id", django_id)
+                    .addParameter("usertype", "CELL")
+                    .addParameter("pedido", pedido.getId() + "")
+                    .addParameter("tipo", pedido.getTipo() + "")
+                    .addFileToUpload(photo, "confirmacion")
+                    .setDelegate(new UploadStatusDelegate() {
+                        @Override
+                        public void onProgress(UploadInfo uploadInfo) {
 
-                                }
+                        }
 
-                                @Override
-                                public void onError(UploadInfo uploadInfo, Exception exception) {
-                                }
+                        @Override
+                        public void onError(UploadInfo uploadInfo, Exception exception) {
+                        }
 
-                                @Override
-                                public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
-                                    Log.i("upload", serverResponse.getBodyAsString());
-                                    try {
-                                        JSONObject message = new JSONObject();
-                                        message.put("message_id", pedido.getMessage_id());
-                                        Log.i("deleting", message.toString());
-                                        emitMessage("delete-message", message);
-                                        NotixFactory.notifications.remove(pedido);
-                                        notixListener.onDelete();
-                                        getNumeroPedido();
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
+                        @Override
+                        public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                            Log.i("upload", serverResponse.getBodyAsString());
+                            try {
+                                JSONObject message = new JSONObject();
+                                message.put("message_id", pedido.getMessage_id());
+                                Log.i("deleting", message.toString());
+                                emitMessage("delete-message", message);
+                                NotixFactory.notifications.remove(pedido);
+                                notixListener.onDelete();
+                                getNumeroPedido();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-                                @Override
-                                public void onCancelled(UploadInfo uploadInfo) {
+                        @Override
+                        public void onCancelled(UploadInfo uploadInfo) {
 
-                                }
-                            })
-                            .startUpload();
+                        }
+                    })
+                    .startUpload();
         } catch (MalformedURLException | FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -318,48 +292,47 @@ public class Notix {
                 .setAutoClearOnSuccess(true);
         String url = "http://104.236.33.228:4000/cancel";
         try {
-            String uploadId =
-                    new MultipartUploadRequest(context, url)
-                            .setNotificationConfig(notificationConfig)
-                            .setAutoDeleteFilesAfterSuccessfulUpload(true)
-                            .setMaxRetries(1)
-                            .addParameter("django_id", django_id)
-                            .addParameter("usertype", "CELL")
-                            .addParameter("pedido", pedido.getId() + "")
-                            .addParameter("tipo", pedido.getTipo() + "")
-                            .addFileToUpload(photo, "confirmacion")
-                            .setDelegate(new UploadStatusDelegate() {
-                                @Override
-                                public void onProgress(UploadInfo uploadInfo) {
+            new MultipartUploadRequest(context, url)
+                    .setNotificationConfig(notificationConfig)
+                    .setAutoDeleteFilesAfterSuccessfulUpload(true)
+                    .setMaxRetries(1)
+                    .addParameter("django_id", django_id)
+                    .addParameter("usertype", "CELL")
+                    .addParameter("pedido", pedido.getId() + "")
+                    .addParameter("tipo", pedido.getTipo() + "")
+                    .addFileToUpload(photo, "confirmacion")
+                    .setDelegate(new UploadStatusDelegate() {
+                        @Override
+                        public void onProgress(UploadInfo uploadInfo) {
 
-                                }
+                        }
 
-                                @Override
-                                public void onError(UploadInfo uploadInfo, Exception exception) {
-                                }
+                        @Override
+                        public void onError(UploadInfo uploadInfo, Exception exception) {
+                        }
 
-                                @Override
-                                public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
-                                    Log.i("upload", serverResponse.getBodyAsString());
-                                    try {
-                                        JSONObject message = new JSONObject();
-                                        message.put("message_id", pedido.getMessage_id());
-                                        Log.i("deleting", message.toString());
-                                        emitMessage("delete-message", message);
-                                        NotixFactory.notifications.remove(pedido);
-                                        notixListener.onDelete();
-                                        getNumeroPedido();
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
+                        @Override
+                        public void onCompleted(UploadInfo uploadInfo, ServerResponse serverResponse) {
+                            Log.i("upload", serverResponse.getBodyAsString());
+                            try {
+                                JSONObject message = new JSONObject();
+                                message.put("message_id", pedido.getMessage_id());
+                                Log.i("deleting", message.toString());
+                                emitMessage("delete-message", message);
+                                NotixFactory.notifications.remove(pedido);
+                                notixListener.onDelete();
+                                getNumeroPedido();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-                                @Override
-                                public void onCancelled(UploadInfo uploadInfo) {
+                        @Override
+                        public void onCancelled(UploadInfo uploadInfo) {
 
-                                }
-                            })
-                            .startUpload();
+                        }
+                    })
+                    .startUpload();
         } catch (MalformedURLException | FileNotFoundException e) {
             e.printStackTrace();
         }

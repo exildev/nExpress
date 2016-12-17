@@ -21,4 +21,11 @@
     <string name="entregado">Entragado</string>
     <string name="aceptar">Aceptar</string>
     <string name="rechazar">Rechazar</string>
+    <string name="no_items_message">Aqui estaran los domicilios que se te asignen</string>
+    <string name="direccion">Direccion:</string>
+    <string name="telefono">Telefono:</string>
+    <string name="celular">Celular:</string>
+    <string name="tienda">Tienda:</string>
+    <string name="direccion_tienda">Direccion tienda:</string>
+    <string name="total">Total:</string>
 </resources>

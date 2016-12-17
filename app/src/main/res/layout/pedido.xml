@@ -64,7 +64,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingBottom="4dp"
-                    android:text="Two-line-item"
                     android:textColor="#000"
                     android:textSize="16sp" />
 
@@ -74,7 +73,6 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="4dp"
                     android:paddingTop="4dp"
-                    android:text="Secondary text"
                     android:textSize="13sp"
                     android:visibility="visible" />
             </LinearLayout>
@@ -112,7 +110,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Direccion:"
+                        android:text="@string/direccion"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -120,8 +118,7 @@
                         android:id="@+id/direccion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Calle falsa 123" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -134,7 +131,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Telefono:"
+                        android:text="@string/telefono"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -142,8 +139,7 @@
                         android:id="@+id/telefono"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="6443434" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -156,7 +152,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Celular:"
+                        android:text="@string/celular"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -164,8 +160,7 @@
                         android:id="@+id/celular"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="3014444070" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -178,7 +173,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tienda:"
+                        android:text="@string/tienda"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -186,8 +181,7 @@
                         android:id="@+id/tienda"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Olimpica 24H" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -200,7 +194,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Direccion tienda:"
+                        android:text="@string/direccion_tienda"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -208,8 +202,7 @@
                         android:id="@+id/direccion_tienda"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Calle falsa #123" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -222,7 +215,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total:"
+                        android:text="@string/total"
                         android:textColor="#000"
                         android:textSize="16sp" />
 
@@ -230,8 +223,7 @@
                         android:id="@+id/total"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="$124.000" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -247,15 +239,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:text="Cancelar"
+                        android:text="@string/cancelar"
                         android:theme="@style/AppTheme.ErrorButton" />
 
                     <Button
                         android:id="@+id/positive_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:text="Aceptar"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/recogido"
                         android:theme="@style/AppTheme.OkButton" />
                 </LinearLayout>
             </LinearLayout>

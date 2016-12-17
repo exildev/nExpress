@@ -32,7 +32,6 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     private GoogleApiClient mGoogleClient;
     private LocationRequest mLocationRequest;
-    private static Intent serviceIntent;
 
     Notix notix;
 
@@ -47,7 +46,6 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     public static void startService(Context context) {
         Intent intent = new Intent(context, GPSService.class);
         context.startService(intent);
-        serviceIntent = intent;
     }
 
     @Override

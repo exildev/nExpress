@@ -2,9 +2,7 @@ package co.com.expressdelnorte.expressdelnorte.notix;
 
 import org.json.JSONObject;
 
-/**
- * Created by pico on 1/08/2016.
- */
+
 public class Message {
     private String emit;
     private JSONObject message;
@@ -14,11 +12,11 @@ public class Message {
         this.message = message;
     }
 
-    public JSONObject getMessage() {
+    JSONObject getMessage() {
         return message;
     }
 
-    public String getEmit() {
+    String getEmit() {
         return emit;
     }
 
