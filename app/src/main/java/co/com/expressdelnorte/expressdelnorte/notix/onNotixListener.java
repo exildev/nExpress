@@ -9,6 +9,8 @@ public interface onNotixListener {
 
     void onNumeroPedido(JSONObject data);
 
+    void onSetPassword(JSONObject data);
+
     void onAsignarPedido(JSONObject data);
 
     void onVisited(JSONObject data);

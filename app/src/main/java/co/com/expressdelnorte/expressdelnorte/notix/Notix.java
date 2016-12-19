@@ -15,7 +15,6 @@ import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadStatusDelegate;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,15 +30,114 @@ public class Notix {
 
     private static final String SOCKET_USERNAME = "user1";
     private static final String SOCKET_PASSWORD = "123456";
-
+    private static Notix instance;
     private Socket mSocket;
     private ArrayList<Message> messages;
     private String django_id;
     private String username;
     private String type;
-    private static Notix instance;
     private onNotixListener notixListener;
     private AuthListener authListener;
+    private Emitter.Listener onIdentify = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("onIdentify", "triggered");
+            final JSONObject message = (JSONObject) args[0];
+            Log.i("onIdentify", message.toString());
+            if (!message.has("ID")) {
+                login();
+            } else {
+                sendMessages();
+            }
+        }
+    };
+    private Emitter.Listener onNotix = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject message = (JSONObject) args[0];
+                String id = message.getString("_id");
+                JSONObject data = message.getJSONObject("data");
+                data.put("_id", id);
+                if (data.has("data")) {
+                    if (notixListener != null) {
+                        notixListener.onNotix(data);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    private Emitter.Listener onVisited = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("visited", "tiggered");
+            try {
+                JSONObject message = (JSONObject) args[0];
+                notixListener.onVisited(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    private Emitter.Listener onSuccesLogin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("onSuccesLogin", "triggered");
+            sendMessages();
+        }
+    };
+    private Emitter.Listener onErrorLogin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("onErrorLogin", "triggered");
+            Log.i("Error", "Hubo un error en el servidor");
+        }
+    };
+    private Emitter.Listener onWebSuccessLogin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("weblogin", "success");
+            authListener.ononWebSuccessLogin();
+        }
+    };
+    private Emitter.Listener onWebErrorLogin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("weblogin", "error");
+            authListener.onWebErrorLogin();
+        }
+    };
+    private Emitter.Listener onGetData = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            final JSONObject data = (JSONObject) args[0];
+            Log.i("onGetData", data.toString());
+            authListener.onGetData(data);
+        }
+    };
+    private Emitter.Listener onNumeroPedido = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final JSONObject message = (JSONObject) args[0];
+            notixListener.onNumeroPedido(message);
+        }
+    };
+    private Emitter.Listener onSetPassword = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final JSONObject message = (JSONObject) args[0];
+            notixListener.onSetPassword(message);
+        }
+    };
+    private Emitter.Listener onAsignarPedido = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final JSONObject message = (JSONObject) args[0];
+            notixListener.onAsignarPedido(message);
+        }
+    };
 
     private Notix() {
         initSocket();
@@ -74,6 +172,7 @@ public class Notix {
             mSocket.on("notix", onNotix);
             mSocket.on("visited", onVisited);
             mSocket.on("numero-pedido", onNumeroPedido);
+            mSocket.on("set-password", onSetPassword);
             mSocket.on("asignar-pedido", onAsignarPedido);
             mSocket.on("modificar-pedido", onAsignarPedido);
             mSocket.connect();
@@ -338,6 +437,16 @@ public class Notix {
         }
     }
 
+    public void setPassword(String password) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("password", password);
+            emitMessage("set-password", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void emitMessage(String emit, JSONObject message) {
         messages.add(new Message(emit, message));
         try {
@@ -349,107 +458,4 @@ public class Notix {
             e.printStackTrace();
         }
     }
-
-    private Emitter.Listener onIdentify = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("onIdentify", "triggered");
-            final JSONObject message = (JSONObject) args[0];
-            Log.i("onIdentify", message.toString());
-            if (!message.has("ID")) {
-                login();
-            } else {
-                sendMessages();
-            }
-        }
-    };
-
-    private Emitter.Listener onNotix = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            try {
-                JSONObject message = (JSONObject) args[0];
-                String id = message.getString("_id");
-                JSONObject data = message.getJSONObject("data");
-                data.put("_id", id);
-                if (data.has("data")) {
-                    if (notixListener != null) {
-                        notixListener.onNotix(data);
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private Emitter.Listener onVisited = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("visited", "tiggered");
-            try {
-                JSONObject message = (JSONObject) args[0];
-                notixListener.onVisited(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private Emitter.Listener onSuccesLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("onSuccesLogin", "triggered");
-            sendMessages();
-        }
-    };
-
-    private Emitter.Listener onErrorLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("onErrorLogin", "triggered");
-            Log.i("Error", "Hubo un error en el servidor");
-        }
-    };
-
-    private Emitter.Listener onWebSuccessLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("weblogin", "success");
-            authListener.ononWebSuccessLogin();
-        }
-    };
-
-    private Emitter.Listener onWebErrorLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i("weblogin", "error");
-            authListener.onWebErrorLogin();
-        }
-    };
-
-    private Emitter.Listener onGetData = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            final JSONObject data = (JSONObject) args[0];
-            Log.i("onGetData", data.toString());
-            authListener.onGetData(data);
-        }
-    };
-
-    private Emitter.Listener onNumeroPedido = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            final JSONObject message = (JSONObject) args[0];
-            notixListener.onNumeroPedido(message);
-        }
-    };
-
-    private Emitter.Listener onAsignarPedido = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            final JSONObject message = (JSONObject) args[0];
-            notixListener.onAsignarPedido(message);
-        }
-    };
 }

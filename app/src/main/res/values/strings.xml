@@ -28,4 +28,12 @@
     <string name="tienda">Tienda:</string>
     <string name="direccion_tienda">Direccion tienda:</string>
     <string name="total">Total:</string>
+    <string name="set_password">Cambiar contraseña</string>
+    <string name="menu">menu</string>
+    <string name="sing_out">Cerrar cesión</string>
+    <string name="password">Contraseña</string>
+    <string name="password2">Repetir contraseña</string>
+    <string name="empty_field">EL campo no puede estar vacío</string>
+    <string name="password_match">Las contraseñas deben coincidir</string>
+    <string name="password_success">Contraseña cambiada con exito</string>
 </resources>

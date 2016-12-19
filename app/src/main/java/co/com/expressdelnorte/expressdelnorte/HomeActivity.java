@@ -16,11 +16,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -31,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -73,6 +77,35 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private boolean isCancelling;
 
     private MaterialDialog loading;
+
+    static Pedido formatPedido(JSONObject message) throws JSONException {
+        JSONObject cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
+        JSONObject tienda = ((JSONArray) message.get("tienda")).getJSONObject(0);
+
+        String nombre = cliente.getString("nombre");
+        String apellidos = cliente.getString("apellidos");
+        String direccion = cliente.getString("direccion");
+        String telefono = cliente.getString("fijo");
+        String celular = cliente.getString("celular");
+        String tiendaNombre = tienda.getString("referencia");
+        String direccionTienda = tienda.getString("direccion");
+        String total = NumberFormat.getCurrencyInstance().format(message.get("total"));
+        String message_id = message.getString("message_id");
+        int tipo = message.getInt("tipo");
+        String estado = "asignado";
+        if (message.has("estado")) {
+            estado = message.getString("estado");
+        }
+
+        int id = message.getInt("id");
+
+        Pedido pedido = new Pedido(total, direccionTienda, tiendaNombre, celular, telefono, apellidos, nombre, direccion);
+        pedido.setId(id);
+        pedido.setTipo(tipo);
+        pedido.setEstado(estado);
+        pedido.setMessage_id(message_id);
+        return pedido;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,35 +253,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         infiniteListView.setAdapter(adapter);
     }
 
-    static Pedido formatPedido(JSONObject message) throws JSONException {
-        JSONObject cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
-        JSONObject tienda = ((JSONArray) message.get("tienda")).getJSONObject(0);
-
-        String nombre = cliente.getString("nombre");
-        String apellidos = cliente.getString("apellidos");
-        String direccion = cliente.getString("direccion");
-        String telefono = cliente.getString("fijo");
-        String celular = cliente.getString("celular");
-        String tiendaNombre = tienda.getString("referencia");
-        String direccionTienda = tienda.getString("direccion");
-        String total = NumberFormat.getCurrencyInstance().format(message.get("total"));
-        String message_id = message.getString("message_id");
-        int tipo = message.getInt("tipo");
-        String estado = "asignado";
-        if (message.has("estado")) {
-            estado = message.getString("estado");
-        }
-
-        int id = message.getInt("id");
-
-        Pedido pedido = new Pedido(total, direccionTienda, tiendaNombre, celular, telefono, apellidos, nombre, direccion);
-        pedido.setId(id);
-        pedido.setTipo(tipo);
-        pedido.setEstado(estado);
-        pedido.setMessage_id(message_id);
-        return pedido;
-    }
-
     public void action(View view) {
         ViewGroup row = (ViewGroup) view.getParent();
         final RelativeLayout container = (RelativeLayout) row.findViewById(R.id.container);
@@ -329,6 +333,30 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         }
     }
 
+    private void send(MaterialDialog dialog) {
+
+        View view = dialog.getCustomView();
+
+        assert view != null;
+        TextView password = (TextView) view.findViewById(R.id.password);
+        TextView password2 = (TextView) view.findViewById(R.id.password2);
+
+        if (password.getText().toString().equals(password2.getText().toString()) && !password.getText().toString().equals("")) {
+            dialog.dismiss();
+            notix.setPassword(password.getText().toString());
+        } else if (password.getText().toString().equals("")) {
+            TextInputLayout til = (TextInputLayout) view.findViewById(R.id.password_container);
+            til.setErrorEnabled(true);
+            til.setError(getString(R.string.empty_field));
+        } else {
+            TextInputLayout til = (TextInputLayout) view.findViewById(R.id.password_container);
+            til.setErrorEnabled(false);
+            til = (TextInputLayout) view.findViewById(R.id.password2_container);
+            til.setErrorEnabled(true);
+            til.setError(getString(R.string.password_match));
+        }
+    }
+
     protected void createLocationRequest() {
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -375,6 +403,38 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         });
     }
 
+    public void setPassword(MenuItem item) {
+        new MaterialDialog.Builder(this)
+                .title(R.string.set_password)
+                .customView(R.layout.set_passoword, true)
+                .positiveText("Guardar")
+                .negativeText("Cerrar")
+                .autoDismiss(false)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        send(dialog);
+                    }
+                })
+                .show();
+    }
+
+    public void signOut(MenuItem item) {
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.home_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
     @Override
     protected void onPause() {
         Log.i("HomeActivity", "onPause");
@@ -384,7 +444,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
 
     @Override
     protected void onResume() {
-
+        notix.setNotixListener(this);
         super.onResume();
     }
 
@@ -452,7 +512,24 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     .setAction("Action", null).show();
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.i("pedido", nPedidos);
         }
+    }
+
+    @Override
+    public void onSetPassword(JSONObject data) {
+        notix.deleteMessage(data);
+        int status = 0;
+        try {
+            status = data.getInt("status");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (status == 200 || status == 201) {
+            Snackbar.make(findViewById(R.id.fab), R.string.password_success, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
+        Log.i("pedido", data.toString());
     }
 
     @Override

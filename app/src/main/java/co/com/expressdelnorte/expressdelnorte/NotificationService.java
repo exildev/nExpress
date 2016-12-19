@@ -59,6 +59,11 @@ public class NotificationService extends Service implements onNotixListener {
     }
 
     @Override
+    public void onSetPassword(JSONObject data) {
+
+    }
+
+    @Override
     public void onAsignarPedido(JSONObject data) {
         NotixFactory.buildNotification(this);
         notix.visitMessage(data);
