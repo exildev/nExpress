@@ -36,4 +36,6 @@
     <string name="empty_field">EL campo no puede estar vacío</string>
     <string name="password_match">Las contraseñas deben coincidir</string>
     <string name="password_success">Contraseña cambiada con exito</string>
+    <string name="confirm_delivery">Confirmando pedido</string>
+    <string name="plase_wait">Por favor espere</string>
 </resources>

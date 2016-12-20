@@ -198,8 +198,10 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 if (pedido != null) {
 
                     int tirilla = 0;
+                    int cerrar = 0;
                     try {
                         tirilla = configurations.getInt("tirilla");
+                        cerrar = configurations.getInt("cerrar");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -249,17 +251,29 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                         case "recogido":
                             holder.positiveButton.setText(R.string.entregado);
                             holder.negativeButton.setText(R.string.cancelar);
+                            final int finalCerrar = cerrar;
                             holder.positiveButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-
-                                    delivering = pedido;
-                                    isCancelling = false;
-                                    mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                            new ContentValues());
-                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                                    startActivityForResult(intent, REQUEST_PCITURE);
+                                    switch (finalCerrar) {
+                                        case 1:
+                                            delivering = pedido;
+                                            isCancelling = false;
+                                            mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                                    new ContentValues());
+                                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+                                            startActivityForResult(intent, REQUEST_PCITURE);
+                                            break;
+                                        default:
+                                            loading = new MaterialDialog.Builder(HomeActivity.this)
+                                                    .title(R.string.confirm_delivery)
+                                                    .content(R.string.plase_wait)
+                                                    .progress(true, 0)
+                                                    .show();
+                                            notix.entregar(pedido);
+                                            break;
+                                    }
                                 }
                             });
                             break;
@@ -600,12 +614,17 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
 
     @Override
     public void onDelete() {
-        setInfiniteList();
-        loading.dismiss();
-        if (NotixFactory.notifications.size() < 1) {
-            findViewById(R.id.no_items).setVisibility(View.VISIBLE);
-            infiniteListView.setVisibility(View.GONE);
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setInfiniteList();
+                loading.dismiss();
+                if (NotixFactory.notifications.size() < 1) {
+                    findViewById(R.id.no_items).setVisibility(View.VISIBLE);
+                    infiniteListView.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override
@@ -643,8 +662,8 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
             Log.i("picture", getRealPathFromURI(mPhotoUri));
             Log.i("pedido", delivering.toString());
             loading = new MaterialDialog.Builder(this)
-                    .title("Subiendo imagen")
-                    .content("Por favor espere")
+                    .title(R.string.confirm_delivery)
+                    .content(R.string.plase_wait)
                     .progress(true, 0)
                     .show();
         }

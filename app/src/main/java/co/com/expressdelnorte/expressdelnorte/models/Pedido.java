@@ -26,6 +26,10 @@ public class Pedido {
         this.direccion = direccion;
     }
 
+    public Pedido() {
+
+    }
+
     public String getEstado() {
         return estado;
     }

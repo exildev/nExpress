@@ -129,6 +129,37 @@ public class Notix {
             notixListener.onNumeroPedido(message);
         }
     };
+
+    private Emitter.Listener onConfirmarPedido = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final JSONObject message = (JSONObject) args[0];
+            deleteMessage(message);
+            Pedido pedido = new Pedido();
+            try {
+                pedido.setId(message.getInt("pedido_id"));
+                pedido.setTipo(message.getInt("tipo"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            int i = NotixFactory.notifications.indexOf(pedido);
+            if (i < 0) {
+                return;
+            }
+            pedido = NotixFactory.notifications.get(i);
+            try {
+                JSONObject msg = new JSONObject();
+                msg.put("message_id", pedido.getMessage_id());
+                Log.i("deleting", msg.toString());
+                emitMessage("delete-message", msg);
+                NotixFactory.notifications.remove(pedido);
+                notixListener.onDelete();
+                getNumeroPedido();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
     private Emitter.Listener onSetPassword = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -180,6 +211,7 @@ public class Notix {
             mSocket.on("set-password", onSetPassword);
             mSocket.on("asignar-pedido", onAsignarPedido);
             mSocket.on("modificar-pedido", onAsignarPedido);
+            mSocket.on("confirmar-pedido", onConfirmarPedido);
             mSocket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -327,6 +359,18 @@ public class Notix {
             message.put("tipo", pedido.getTipo());
             message.put("cell_id", django_id);
             emitMessage("recojer-pedido", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void entregar(Pedido pedido) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("pedido_id", pedido.getId());
+            message.put("tipo", pedido.getTipo());
+            message.put("cell_id", django_id);
+            emitMessage("confirmar-pedido", message);
         } catch (JSONException e) {
             e.printStackTrace();
         }
