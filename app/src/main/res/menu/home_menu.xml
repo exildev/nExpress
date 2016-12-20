@@ -8,15 +8,13 @@
         app:showAsAction="ifRoom">
         <menu>
             <item
-                android:id="@+id/action_one"
                 android:icon="@drawable/ic_vpn_key_24dp"
                 android:onClick="setPassword"
                 android:title="@string/set_password"
                 app:showAsAction="always" />
             <item
-
-                android:id="@+id/action_two"
                 android:icon="@drawable/ic_exit_to_app_24dp"
+                android:onClick="signOut"
                 android:title="@string/sing_out" />
         </menu>
     </item>

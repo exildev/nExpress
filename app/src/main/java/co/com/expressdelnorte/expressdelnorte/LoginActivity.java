@@ -3,10 +3,10 @@ package co.com.expressdelnorte.expressdelnorte;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -217,7 +217,7 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
     }
 
     @Override
-    public void ononWebSuccessLogin() {
+    public void onWebSuccessLogin() {
         TextView passwordView = (TextView) findViewById(R.id.password);
         final String password = passwordView.getText().toString();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

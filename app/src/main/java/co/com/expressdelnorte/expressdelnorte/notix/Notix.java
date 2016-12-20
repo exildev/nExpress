@@ -99,7 +99,7 @@ public class Notix {
         @Override
         public void call(Object... args) {
             Log.i("weblogin", "success");
-            authListener.ononWebSuccessLogin();
+            authListener.onWebSuccessLogin();
         }
     };
     private Emitter.Listener onWebErrorLogin = new Emitter.Listener() {
