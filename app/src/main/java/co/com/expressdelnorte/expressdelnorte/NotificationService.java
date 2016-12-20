@@ -87,6 +87,11 @@ public class NotificationService extends Service implements onNotixListener {
     }
 
     @Override
+    public void onGetData(JSONObject data) {
+
+    }
+
+    @Override
     public void onDelete() {
 
     }

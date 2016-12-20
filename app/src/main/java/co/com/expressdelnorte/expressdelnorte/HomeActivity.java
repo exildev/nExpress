@@ -33,6 +33,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -73,6 +74,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private String nPedidos;
     private InfiniteListView infiniteListView;
     private GoogleApiClient mGoogleClient;
+    private JSONObject configurations;
 
     private Uri mPhotoUri;
     private Pedido delivering = null;
@@ -131,6 +133,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         notix.setNotixListener(this);
         notix.getNumeroPedido();
         notix.getMessages();
+        notix.getData();
 
         mGoogleClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -183,6 +186,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     holder.negativeButton = (Button) convertView.findViewById(R.id.negative_button);
                     holder.positiveButton = (Button) convertView.findViewById(R.id.positive_button);
                     holder.dropImage = (ImageView) convertView.findViewById(R.id.drop_image);
+                    holder.total_container = (LinearLayout) convertView.findViewById(R.id.total_container);
                     convertView.setTag(holder);
 
                 } else {
@@ -192,6 +196,14 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 final Pedido pedido = NotixFactory.notifications.get(position);
 
                 if (pedido != null) {
+
+                    int tirilla = 0;
+                    try {
+                        tirilla = configurations.getInt("tirilla");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
                     holder.cliente.setText(pedido.getClienteNombre());
                     holder.direccionSubtitle.setText(pedido.getDireccion());
                     holder.direccion.setText(pedido.getDireccion());
@@ -199,7 +211,17 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     holder.celular.setText(pedido.getCelular());
                     holder.tienda.setText(pedido.getTienda());
                     holder.direccionTienda.setText(pedido.getDireccionTienda());
-                    holder.total.setText(pedido.getTotal());
+
+                    switch (tirilla) {
+                        case 1:
+                            holder.total.setText(pedido.getTotal());
+                            holder.total_container.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            holder.total_container.setVisibility(View.GONE);
+                            break;
+                    }
+
                     holder.negativeButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -572,6 +594,11 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     }
 
     @Override
+    public void onGetData(final JSONObject data) {
+        configurations = data;
+    }
+
+    @Override
     public void onDelete() {
         setInfiniteList();
         loading.dismiss();
@@ -648,5 +675,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         Button negativeButton;
         Button positiveButton;
         ImageView dropImage;
+        LinearLayout total_container;
     }
 }

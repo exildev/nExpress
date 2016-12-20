@@ -114,7 +114,12 @@ public class Notix {
         public void call(final Object... args) {
             final JSONObject data = (JSONObject) args[0];
             Log.i("onGetData", data.toString());
-            authListener.onGetData(data);
+            if (authListener != null) {
+                authListener.onGetData(data);
+            }
+            if (notixListener != null) {
+                notixListener.onGetData(data);
+            }
         }
     };
     private Emitter.Listener onNumeroPedido = new Emitter.Listener() {

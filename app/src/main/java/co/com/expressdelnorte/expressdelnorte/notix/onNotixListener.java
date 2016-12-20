@@ -15,5 +15,7 @@ public interface onNotixListener {
 
     void onVisited(JSONObject data);
 
+    void onGetData(JSONObject data);
+
     void onDelete();
 }
