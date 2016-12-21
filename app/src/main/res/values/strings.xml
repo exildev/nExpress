@@ -38,4 +38,7 @@
     <string name="password_success">Contraseña cambiada con exito</string>
     <string name="confirm_delivery">Confirmando pedido</string>
     <string name="plase_wait">Por favor espere</string>
+    <string name="cancel_delivery">Cancelar domicilio</string>
+    <string name="observacion">Observación</string>
+    <string name="choose_reason">Debe escojer un motivo</string>
 </resources>

@@ -15,6 +15,7 @@ import net.gotev.uploadservice.UploadInfo;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadStatusDelegate;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,11 +34,14 @@ public class Notix {
     private static Notix instance;
     private Socket mSocket;
     private ArrayList<Message> messages;
+    private JSONObject forCancelling;
+    private JSONObject forConfirming;
     private String django_id;
     private String username;
     private String type;
     private onNotixListener notixListener;
     private AuthListener authListener;
+    private Context context;
     private Emitter.Listener onIdentify = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -119,6 +123,16 @@ public class Notix {
             }
             if (notixListener != null) {
                 notixListener.onGetData(data);
+            }
+        }
+    };
+    private Emitter.Listener onMotivoCancelar = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            final JSONArray data = (JSONArray) args[0];
+            Log.i("onMotivoCancelar", data.toString());
+            if (notixListener != null) {
+                notixListener.onCancelations(data);
             }
         }
     };
@@ -205,6 +219,7 @@ public class Notix {
             mSocket.on("web-success-login", onWebSuccessLogin);
             mSocket.on("web-error-login", onWebErrorLogin);
             mSocket.on("get-data", onGetData);
+            mSocket.on("motivo-cancelar", onMotivoCancelar);
             mSocket.on("notix", onNotix);
             mSocket.on("visited", onVisited);
             mSocket.on("numero-pedido", onNumeroPedido);
@@ -212,6 +227,7 @@ public class Notix {
             mSocket.on("asignar-pedido", onAsignarPedido);
             mSocket.on("modificar-pedido", onAsignarPedido);
             mSocket.on("confirmar-pedido", onConfirmarPedido);
+            mSocket.on("cancelar-pedido", onConfirmarPedido);
             mSocket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -322,6 +338,18 @@ public class Notix {
         }
     }
 
+    public void getCancelations() {
+        Log.i("getCancelations", "init");
+        try {
+            JSONObject message = new JSONObject();
+            message.put("cell_id", django_id);
+            Log.i("getCancelations", message.toString());
+            mSocket.emit("motivo-cancelar", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void sendMessages() {
         if (messages == null) {
             messages = new ArrayList<>();
@@ -337,6 +365,9 @@ public class Notix {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+        if (forCancelling != null) {
+            cancelar(forCancelling);
         }
         messages = new ArrayList<>();
     }
@@ -431,7 +462,41 @@ public class Notix {
         }
     }
 
-    public void cancelar(final Pedido pedido, String photo, Context context) {
+    public void cancelar(Pedido pedido, int motivo, String observacion) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("pedido_id", pedido.getId());
+            message.put("tipo", pedido.getTipo());
+            message.put("cell_id", django_id);
+            message.put("motivo", motivo);
+            message.put("observacion", observacion);
+            emitMessage("cancelar-pedido", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelar(final Pedido pedido, int motivo, String observacion, String photo, Context context) {
+        forCancelling = new JSONObject();
+        try {
+            forCancelling.put("pedido", pedido.getId());
+            forCancelling.put("tipo", pedido.getTipo());
+            forCancelling.put("motivo", motivo);
+            forCancelling.put("observacion", observacion);
+            forCancelling.put("confirmacion", photo);
+            forCancelling.put("message_id", pedido.getMessage_id());
+            this.context = context;
+            JSONObject msg = new JSONObject();
+            msg.put("django_id", django_id);
+            msg.put("usertype", "CELL");
+            mSocket.emit("identify", msg);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void cancelar(final JSONObject forCancelling) {
         UploadNotificationConfig notificationConfig = new UploadNotificationConfig()
                 .setTitle("Subiendo solucion")
                 .setInProgressMessage("Subiendo solucion a [[UPLOAD_RATE]] ([[PROGRESS]])")
@@ -446,9 +511,11 @@ public class Notix {
                     .setMaxRetries(1)
                     .addParameter("django_id", django_id)
                     .addParameter("usertype", "CELL")
-                    .addParameter("pedido", pedido.getId() + "")
-                    .addParameter("tipo", pedido.getTipo() + "")
-                    .addFileToUpload(photo, "confirmacion")
+                    .addParameter("pedido", forCancelling.getInt("pedido") + "")
+                    .addParameter("tipo", forCancelling.getInt("tipo") + "")
+                    .addParameter("motivo", forCancelling.getInt("motivo") + "")
+                    .addParameter("observacion", forCancelling.getString("observacion"))
+                    .addFileToUpload(forCancelling.getString("confirmacion"), "confirmacion")
                     .setDelegate(new UploadStatusDelegate() {
                         @Override
                         public void onProgress(UploadInfo uploadInfo) {
@@ -464,9 +531,12 @@ public class Notix {
                             Log.i("upload", serverResponse.getBodyAsString());
                             try {
                                 JSONObject message = new JSONObject();
-                                message.put("message_id", pedido.getMessage_id());
+                                message.put("message_id", forCancelling.getString("message_id"));
                                 Log.i("deleting", message.toString());
                                 emitMessage("delete-message", message);
+                                Pedido pedido = new Pedido();
+                                pedido.setId(forCancelling.getInt("pedido"));
+                                pedido.setTipo(forCancelling.getInt("tipo"));
                                 NotixFactory.notifications.remove(pedido);
                                 notixListener.onDelete();
                                 getNumeroPedido();
@@ -481,7 +551,8 @@ public class Notix {
                         }
                     })
                     .startUpload();
-        } catch (MalformedURLException | FileNotFoundException e) {
+            this.forCancelling = null;
+        } catch (MalformedURLException | FileNotFoundException | JSONException e) {
             e.printStackTrace();
         }
     }

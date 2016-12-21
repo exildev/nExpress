@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -88,6 +89,11 @@ public class NotificationService extends Service implements onNotixListener {
 
     @Override
     public void onGetData(JSONObject data) {
+
+    }
+
+    @Override
+    public void onCancelations(JSONArray data) {
 
     }
 

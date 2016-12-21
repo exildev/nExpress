@@ -18,12 +18,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +34,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -75,10 +80,12 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private InfiniteListView infiniteListView;
     private GoogleApiClient mGoogleClient;
     private JSONObject configurations;
+    private JSONArray cancelations;
 
     private Uri mPhotoUri;
     private Pedido delivering = null;
     private boolean isCancelling;
+    private int reasonSelected = -1;
 
     private MaterialDialog loading;
 
@@ -132,8 +139,9 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         notix = NotixFactory.buildNotix(this);
         notix.setNotixListener(this);
         notix.getNumeroPedido();
-        notix.getMessages();
         notix.getData();
+        notix.getCancelations();
+        notix.getMessages();
 
         mGoogleClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -199,9 +207,11 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
 
                     int tirilla = 0;
                     int cerrar = 0;
+                    int cancelar = 0;
                     try {
                         tirilla = configurations.getInt("tirilla");
                         cerrar = configurations.getInt("cerrar");
+                        cancelar = configurations.getInt("cancelar");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -224,16 +234,24 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                             break;
                     }
 
+                    final int finalCancelar = cancelar;
                     holder.negativeButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            delivering = pedido;
-                            isCancelling = true;
-                            mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                    new ContentValues());
-                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                            startActivityForResult(intent, REQUEST_PCITURE);
+                            switch (finalCancelar) {
+                                case 1:
+                                    delivering = pedido;
+                                    isCancelling = true;
+                                    mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                            new ContentValues());
+                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+                                    startActivityForResult(intent, REQUEST_PCITURE);
+                                    break;
+                                default:
+                                    cancelar(pedido, null);
+                                    break;
+                            }
                         }
                     });
                     switch (pedido.getEstado()) {
@@ -395,7 +413,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         }
     }
 
-    protected void createLocationRequest() {
+    private void createLocationRequest() {
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
@@ -439,6 +457,70 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 }
             }
         });
+    }
+
+    private void cancelar(final Pedido pedido, final String foto) {
+        MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .title(R.string.cancel_delivery)
+                .customView(R.layout.cancelar, true)
+                .positiveText(R.string.aceptar)
+                .negativeText(R.string.cancelar)
+                .autoDismiss(false)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        View custom = dialog.getCustomView();
+                        assert custom != null;
+                        TextInputEditText observacion = (TextInputEditText) custom.findViewById(R.id.observacion);
+                        String obs = observacion.getText().toString();
+                        if (reasonSelected != -1 && !obs.equals("")) {
+                            if (foto == null) {
+                                notix.cancelar(pedido, reasonSelected, obs);
+                            } else {
+                                notix.cancelar(pedido, reasonSelected, obs, foto, HomeActivity.this);
+                            }
+                            dialog.dismiss();
+                            loading = new MaterialDialog.Builder(HomeActivity.this)
+                                    .title(R.string.confirm_delivery)
+                                    .content(R.string.plase_wait)
+                                    .progress(true, 0)
+                                    .show();
+                        } else if (reasonSelected == -1) {
+                            RadioGroup radioGroup = (RadioGroup) custom.findViewById(R.id.radio_group);
+                            RadioButton last = (RadioButton) radioGroup.getChildAt(radioGroup.getChildCount() - 1);
+                            last.setError(getString(R.string.choose_reason));
+                        } else {
+                            observacion.setError(getString(R.string.empty_field));
+                        }
+                    }
+                })
+                .show();
+        View custom = dialog.getCustomView();
+        assert custom != null;
+        RadioGroup radioGroup = (RadioGroup) custom.findViewById(R.id.radio_group);
+        LayoutInflater inflater = LayoutInflater.from(radioGroup.getContext());
+        for (int i = 0; i < cancelations.length(); i++) {
+            try {
+                final JSONObject item = cancelations.getJSONObject(i);
+                RadioButton radio = (RadioButton) inflater.inflate(R.layout.motivo, radioGroup, false);
+                radio.setText(item.getString("nombre"));
+                radio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        try {
+                            if (b) {
+                                reasonSelected = item.getInt("id");
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                radioGroup.addView(radio);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void setPassword(MenuItem item) {
@@ -613,6 +695,11 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     }
 
     @Override
+    public void onCancelations(JSONArray data) {
+        cancelations = data;
+    }
+
+    @Override
     public void onDelete() {
         runOnUiThread(new Runnable() {
             @Override
@@ -654,18 +741,18 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
             }
         } else if (requestCode == REQUEST_PCITURE && resultCode == RESULT_OK) {
             if (isCancelling) {
-                notix.cancelar(delivering, getRealPathFromURI(mPhotoUri), this);
+                cancelar(delivering, getRealPathFromURI(mPhotoUri));
             } else {
                 notix.entregar(delivering, getRealPathFromURI(mPhotoUri), this);
+                loading = new MaterialDialog.Builder(this)
+                        .title(R.string.confirm_delivery)
+                        .content(R.string.plase_wait)
+                        .progress(true, 0)
+                        .show();
             }
             Log.i("isCancelling", isCancelling + "");
             Log.i("picture", getRealPathFromURI(mPhotoUri));
             Log.i("pedido", delivering.toString());
-            loading = new MaterialDialog.Builder(this)
-                    .title(R.string.confirm_delivery)
-                    .content(R.string.plase_wait)
-                    .progress(true, 0)
-                    .show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
