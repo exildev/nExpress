@@ -369,6 +369,9 @@ public class Notix {
         if (forCancelling != null) {
             cancelar(forCancelling);
         }
+        if (forConfirming != null) {
+            entrega(forConfirming);
+        }
         messages = new ArrayList<>();
     }
 
@@ -408,6 +411,23 @@ public class Notix {
     }
 
     public void entregar(final Pedido pedido, String photo, Context context) {
+        forConfirming = new JSONObject();
+        try {
+            forConfirming.put("pedido", pedido.getId());
+            forConfirming.put("tipo", pedido.getTipo());
+            forConfirming.put("confirmacion", photo);
+            forConfirming.put("message_id", pedido.getMessage_id());
+            this.context = context;
+            JSONObject msg = new JSONObject();
+            msg.put("django_id", django_id);
+            msg.put("usertype", "CELL");
+            mSocket.emit("identify", msg);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void entrega(final JSONObject forConfirming) {
         UploadNotificationConfig notificationConfig = new UploadNotificationConfig()
                 .setTitle("Subiendo solucion")
                 .setInProgressMessage("Subiendo solucion a [[UPLOAD_RATE]] ([[PROGRESS]])")
@@ -422,9 +442,9 @@ public class Notix {
                     .setMaxRetries(1)
                     .addParameter("django_id", django_id)
                     .addParameter("usertype", "CELL")
-                    .addParameter("pedido", pedido.getId() + "")
-                    .addParameter("tipo", pedido.getTipo() + "")
-                    .addFileToUpload(photo, "confirmacion")
+                    .addParameter("pedido", forConfirming.getInt("pedido") + "")
+                    .addParameter("tipo", forConfirming.getInt("tipo") + "")
+                    .addFileToUpload(forConfirming.getString("confirmacion"), "confirmacion")
                     .setDelegate(new UploadStatusDelegate() {
                         @Override
                         public void onProgress(UploadInfo uploadInfo) {
@@ -440,9 +460,12 @@ public class Notix {
                             Log.i("upload", serverResponse.getBodyAsString());
                             try {
                                 JSONObject message = new JSONObject();
-                                message.put("message_id", pedido.getMessage_id());
+                                message.put("message_id", forConfirming.getString("message_id"));
                                 Log.i("deleting", message.toString());
                                 emitMessage("delete-message", message);
+                                Pedido pedido = new Pedido();
+                                pedido.setId(forConfirming.getInt("pedido"));
+                                pedido.setTipo(forConfirming.getInt("tipo"));
                                 NotixFactory.notifications.remove(pedido);
                                 notixListener.onDelete();
                                 getNumeroPedido();
@@ -457,7 +480,8 @@ public class Notix {
                         }
                     })
                     .startUpload();
-        } catch (MalformedURLException | FileNotFoundException e) {
+            this.forConfirming = null;
+        } catch (MalformedURLException | FileNotFoundException | JSONException e) {
             e.printStackTrace();
         }
     }
@@ -493,7 +517,6 @@ public class Notix {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     private void cancelar(final JSONObject forCancelling) {
