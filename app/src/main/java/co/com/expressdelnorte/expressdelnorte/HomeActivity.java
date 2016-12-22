@@ -140,6 +140,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         notix.setNotixListener(this);
         notix.getNumeroPedido();
         notix.getData();
+        notix.getTecnoSoat();
         notix.getCancelations();
         notix.getMessages();
 
@@ -692,6 +693,11 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     @Override
     public void onGetData(final JSONObject data) {
         configurations = data;
+    }
+
+    @Override
+    public void onTecnoSoat(JSONObject data) {
+        NotixFactory.buildNotifSoatTecno(this, data);
     }
 
     @Override
