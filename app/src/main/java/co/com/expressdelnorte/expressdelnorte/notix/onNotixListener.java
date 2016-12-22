@@ -18,6 +18,8 @@ public interface onNotixListener {
 
     void onGetData(JSONObject data);
 
+    void onTecnoSoat(JSONObject data);
+
     void onCancelations(JSONArray data);
 
     void onDelete();

@@ -41,4 +41,8 @@
     <string name="cancel_delivery">Cancelar domicilio</string>
     <string name="observacion">Observación</string>
     <string name="choose_reason">Debe escojer un motivo</string>
+    <string name="notification_title">Express del norte</string>
+    <string name="pending_deliverys">Tienes domicilios pendientes por entregar</string>
+    <string name="notif_soat">"El soat se vencerá el %1$s"</string>
+    <string name="notif_tecno">"La Tecnomecanica se vencerá el %1$s"</string>
 </resources>

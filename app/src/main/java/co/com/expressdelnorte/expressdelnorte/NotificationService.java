@@ -33,6 +33,7 @@ public class NotificationService extends Service implements onNotixListener {
         notix = NotixFactory.buildNotix(this);
         notix.setNotixListener(this);
         notix.getMessages();
+        notix.getTecnoSoat();
         super.onCreate();
     }
 
@@ -45,6 +46,7 @@ public class NotificationService extends Service implements onNotixListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("NotificationService", "onStartCommand");
         notix.getMessages();
+        notix.getTecnoSoat();
         super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
@@ -90,6 +92,11 @@ public class NotificationService extends Service implements onNotixListener {
     @Override
     public void onGetData(JSONObject data) {
 
+    }
+
+    @Override
+    public void onTecnoSoat(JSONObject data) {
+        NotixFactory.buildNotifSoatTecno(this, data);
     }
 
     @Override

@@ -126,6 +126,16 @@ public class Notix {
             }
         }
     };
+    private Emitter.Listener onTecnoSoat = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            final JSONObject data = (JSONObject) args[0];
+            Log.i("onGetData", data.toString());
+            if (notixListener != null) {
+                notixListener.onTecnoSoat(data);
+            }
+        }
+    };
     private Emitter.Listener onMotivoCancelar = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -219,6 +229,7 @@ public class Notix {
             mSocket.on("web-success-login", onWebSuccessLogin);
             mSocket.on("web-error-login", onWebErrorLogin);
             mSocket.on("get-data", onGetData);
+            mSocket.on("tecno-soat", onTecnoSoat);
             mSocket.on("motivo-cancelar", onMotivoCancelar);
             mSocket.on("notix", onNotix);
             mSocket.on("visited", onVisited);
@@ -333,6 +344,18 @@ public class Notix {
             message.put("cell_id", django_id);
             Log.i("getData", message.toString());
             mSocket.emit("get-data", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getTecnoSoat() {
+        Log.i("getData", "init");
+        try {
+            JSONObject message = new JSONObject();
+            message.put("cell_id", django_id);
+            Log.i("getTecnoSoat", message.toString());
+            mSocket.emit("tecno-soat", message);
         } catch (JSONException e) {
             e.printStackTrace();
         }
