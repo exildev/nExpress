@@ -22,5 +22,7 @@ public interface onNotixListener {
 
     void onCancelations(JSONArray data);
 
+    void onRequestGPS(JSONObject data);
+
     void onDelete();
 }

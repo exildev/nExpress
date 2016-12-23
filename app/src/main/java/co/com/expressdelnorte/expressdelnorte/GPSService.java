@@ -30,22 +30,21 @@ import co.com.expressdelnorte.expressdelnorte.notix.NotixFactory;
 
 public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
+    Notix notix;
     private GoogleApiClient mGoogleClient;
     private LocationRequest mLocationRequest;
 
-    Notix notix;
-
     public GPSService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     public static void startService(Context context) {
         Intent intent = new Intent(context, GPSService.class);
         context.startService(intent);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     @Override
@@ -146,6 +145,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public void onLocationChanged(Location location) {
         if (NotixFactory.notifications.size() < 1) {
+            notix.stopGPS();
             stopSelf();
             return;
         }

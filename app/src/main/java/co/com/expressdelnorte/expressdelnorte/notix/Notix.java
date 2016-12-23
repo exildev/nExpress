@@ -198,6 +198,13 @@ public class Notix {
             notixListener.onAsignarPedido(message);
         }
     };
+    private Emitter.Listener onRequestGPS = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject message = (JSONObject) args[0];
+            notixListener.onRequestGPS(message);
+        }
+    };
 
     private Notix() {
         initSocket();
@@ -239,6 +246,7 @@ public class Notix {
             mSocket.on("modificar-pedido", onAsignarPedido);
             mSocket.on("confirmar-pedido", onConfirmarPedido);
             mSocket.on("cancelar-pedido", onConfirmarPedido);
+            mSocket.on("request-gps", onRequestGPS);
             mSocket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -403,6 +411,28 @@ public class Notix {
             JSONObject message = new JSONObject();
             message.put("lat", lat);
             message.put("lng", lng);
+            emitMessage("send-gps", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopGPS() {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("cell_id", django_id);
+            emitMessage("stop-gps", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void responseGPS(double lat, double lng, JSONObject pedido) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("lat", lat);
+            message.put("lng", lng);
+            message.put("pedido", pedido);
             emitMessage("send-gps", message);
         } catch (JSONException e) {
             e.printStackTrace();

@@ -1,10 +1,21 @@
 package co.com.expressdelnorte.expressdelnorte;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,9 +26,10 @@ import co.com.expressdelnorte.expressdelnorte.notix.Notix;
 import co.com.expressdelnorte.expressdelnorte.notix.NotixFactory;
 import co.com.expressdelnorte.expressdelnorte.notix.onNotixListener;
 
-public class NotificationService extends Service implements onNotixListener {
+public class NotificationService extends Service implements onNotixListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    Notix notix;
+    private Notix notix;
+    private GoogleApiClient mGoogleClient;
 
     public NotificationService() {
     }
@@ -34,6 +46,11 @@ public class NotificationService extends Service implements onNotixListener {
         notix.setNotixListener(this);
         notix.getMessages();
         notix.getTecnoSoat();
+        mGoogleClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this).build();
+        mGoogleClient.connect();
         super.onCreate();
     }
 
@@ -105,7 +122,31 @@ public class NotificationService extends Service implements onNotixListener {
     }
 
     @Override
+    public void onRequestGPS(JSONObject data) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleClient);
+        notix.responseGPS(lastLocation.getLatitude(), lastLocation.getLongitude(), data);
+    }
+
+    @Override
     public void onDelete() {
+
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 }
