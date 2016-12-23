@@ -724,7 +724,9 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
             @Override
             public void run() {
                 setInfiniteList();
-                loading.dismiss();
+                if (loading != null) {
+                    loading.dismiss();
+                }
                 if (NotixFactory.notifications.size() < 1) {
                     findViewById(R.id.no_items).setVisibility(View.VISIBLE);
                     infiniteListView.setVisibility(View.GONE);

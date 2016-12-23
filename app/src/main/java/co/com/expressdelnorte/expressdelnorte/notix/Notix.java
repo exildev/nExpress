@@ -158,10 +158,15 @@ public class Notix {
         @Override
         public void call(Object... args) {
             final JSONObject message = (JSONObject) args[0];
+            Log.i("onConfirmarPedido", message.toString());
             deleteMessage(message);
             Pedido pedido = new Pedido();
             try {
-                pedido.setId(message.getInt("pedido_id"));
+                if (message.has("pedido_id")) {
+                    pedido.setId(message.getInt("pedido_id"));
+                } else {
+                    pedido.setId(message.getInt("id"));
+                }
                 pedido.setTipo(message.getInt("tipo"));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -246,6 +251,7 @@ public class Notix {
             mSocket.on("modificar-pedido", onAsignarPedido);
             mSocket.on("confirmar-pedido", onConfirmarPedido);
             mSocket.on("cancelar-pedido", onConfirmarPedido);
+            mSocket.on("trasladar-pedido", onConfirmarPedido);
             mSocket.on("request-gps", onRequestGPS);
             mSocket.connect();
         } catch (URISyntaxException e) {
