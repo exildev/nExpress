@@ -93,7 +93,16 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private MaterialDialog loading;
 
     static Pedido formatPedido(JSONObject message) throws JSONException {
-        JSONObject cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
+        JSONObject cliente;
+        String total = "";
+        if (message.has("cliente")) {
+            cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
+            total = NumberFormat.getCurrencyInstance().format(message.get("total"));
+        } else {
+            cliente = message.getJSONObject("info").getJSONObject("cliente");
+            total = NumberFormat.getCurrencyInstance().format(message.getJSONObject("info").get("total_pedido"));
+        }
+
         JSONObject tienda = ((JSONArray) message.get("tienda")).getJSONObject(0);
 
         String nombre = cliente.getString("nombre");
@@ -103,7 +112,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         String celular = cliente.getString("celular");
         String tiendaNombre = tienda.getString("referencia");
         String direccionTienda = tienda.getString("direccion");
-        String total = NumberFormat.getCurrencyInstance().format(message.get("total"));
         String message_id = message.getString("message_id");
         int tipo = message.getInt("tipo");
         String estado = "asignado";

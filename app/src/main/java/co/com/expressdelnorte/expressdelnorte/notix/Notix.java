@@ -439,7 +439,7 @@ public class Notix {
             message.put("lat", lat);
             message.put("lng", lng);
             message.put("pedido", pedido);
-            emitMessage("send-gps", message);
+            emitMessage("reponse-gps", message);
         } catch (JSONException e) {
             e.printStackTrace();
         }
