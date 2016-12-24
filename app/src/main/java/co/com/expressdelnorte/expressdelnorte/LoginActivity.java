@@ -1,11 +1,16 @@
 package co.com.expressdelnorte.expressdelnorte;
 
 import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +36,7 @@ import co.com.expressdelnorte.expressdelnorte.notix.NotixFactory;
 
 public class LoginActivity extends AppCompatActivity implements AuthListener {
 
+    private static final int PERMISSIONS_READ_PHONE_STATE = 2;
     Notix notix;
 
     @Override
@@ -46,11 +52,7 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
             }
         });
 
-        notix = NotixFactory.buildNotix(this);
-        notix.setAuthListener(this);
-        notix.getData();
-
-        autoLogin();
+        validPermissions();
     }
 
     private void autoLogin() {
@@ -68,21 +70,6 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
                     notix.webLogin(password);
                 }
             }, 400);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                notix.sendQR(result.getContents());
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -214,6 +201,66 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
     private void initHome() {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+    }
+
+    private void initNotix() {
+        Log.i("notix", "init");
+        notix = NotixFactory.buildNotix(this);
+        notix.setAuthListener(this);
+        notix.getData();
+        autoLogin();
+    }
+
+    private void validPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_PHONE_STATE}, PERMISSIONS_READ_PHONE_STATE);
+                return;
+            }
+        }
+        initNotix();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSIONS_READ_PHONE_STATE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                validPermissions();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.imei_permissions_message)
+                        .setCancelable(false)
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                validPermissions();
+                            }
+                        })
+                        .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                finish();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                notix.sendQR(result.getContents());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override

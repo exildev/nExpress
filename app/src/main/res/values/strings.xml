@@ -17,6 +17,8 @@
     <string name="recogido">Recogido</string>
     <string name="cancelar">Cancelar</string>
     <string name="gps_permissions_message">Para que esta aplicación funcione correctamente usted debe dar permisos de acceso al GPS ¿Desea hacerlo ahora?</string>
+    <string name="imei_permissions_message">Para que esta aplicación funcione correctamente usted debe dar permisos de acceso al IMEI ¿Desea hacerlo ahora?</string>
+    <string name="media_permissions_message">Para que esta aplicación funcione correctamente usted debe dar permisos de acceso a la camara ¿Desea hacerlo ahora?</string>
     <string name="activate_gps_message">Para que esta aplicación funcione correctamente debe estar atcivado el GPS\\n¿Desea activarlo ahora?</string>
     <string name="entregado">Entragado</string>
     <string name="aceptar">Aceptar</string>
@@ -45,4 +47,5 @@
     <string name="pending_deliverys">Tienes domicilios pendientes por entregar</string>
     <string name="notif_soat">"El soat se vencerá el %1$s"</string>
     <string name="notif_tecno">"La Tecnomecanica se vencerá el %1$s"</string>
+    <string name="no_gps_permissions">No se pudo iniciar el servicio porque no hay permisos para el GPS</string>
 </resources>

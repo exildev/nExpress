@@ -109,6 +109,7 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     protected void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, R.string.no_gps_permissions, Toast.LENGTH_LONG).show();
             stopSelf();
             return;
         }

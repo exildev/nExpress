@@ -76,7 +76,9 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 3;
     private static final int REQUEST_LOCATION_SETTINGS = 12;
-    private static final int REQUEST_PCITURE = 6;
+    private static final int REQUEST_PICTURE = 6;
+    private static final int PERMISSIONS_WRITE_EXTERNAL_STORAGE = 4;
+    private static final int PERMISSIONS_CAMERA = 5;
 
     private Notix notix;
     private String nPedidos;
@@ -254,11 +256,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                                 case 1:
                                     delivering = pedido;
                                     isCancelling = true;
-                                    mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                            new ContentValues());
-                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                                    startActivityForResult(intent, REQUEST_PCITURE);
+                                    takePicture();
                                     break;
                                 default:
                                     cancelar(pedido, null);
@@ -289,11 +287,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                                         case 1:
                                             delivering = pedido;
                                             isCancelling = false;
-                                            mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                                    new ContentValues());
-                                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
-                                            startActivityForResult(intent, REQUEST_PCITURE);
+                                            takePicture();
                                             break;
                                         default:
                                             loading = new MaterialDialog.Builder(HomeActivity.this)
@@ -399,6 +393,28 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         } else {
             createLocationRequest();
         }
+    }
+
+    private void takePicture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+            } else if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, PERMISSIONS_CAMERA);
+            } else {
+                initCameraForPicture();
+            }
+        } else {
+            initCameraForPicture();
+        }
+    }
+
+    private void initCameraForPicture() {
+        mPhotoUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new ContentValues());
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+        startActivityForResult(intent, REQUEST_PICTURE);
     }
 
     private void send(MaterialDialog dialog) {
@@ -615,11 +631,33 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 alert.show();
             }
         }
+        if (requestCode == PERMISSIONS_WRITE_EXTERNAL_STORAGE || requestCode == PERMISSIONS_CAMERA) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Now user should be able to use camera
+                takePicture();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.media_permissions_message)
+                        .setCancelable(false)
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                validPermissions();
+                            }
+                        })
+                        .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                finish();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        createLocationRequest();
+        validPermissions();
     }
 
     @Override
@@ -768,7 +806,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     alert.show();
                     break;
             }
-        } else if (requestCode == REQUEST_PCITURE && resultCode == RESULT_OK) {
+        } else if (requestCode == REQUEST_PICTURE && resultCode == RESULT_OK) {
             if (isCancelling) {
                 cancelar(delivering, getRealPathFromURI(mPhotoUri));
             } else {
