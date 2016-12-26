@@ -62,6 +62,7 @@ public class NotificationService extends Service implements onNotixListener, Goo
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("NotificationService", "onStartCommand");
+        notix.setNotixListener(this);
         notix.getMessages();
         notix.getTecnoSoat();
         super.onStartCommand(intent, flags, startId);
