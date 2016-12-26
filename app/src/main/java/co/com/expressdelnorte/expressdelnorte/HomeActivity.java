@@ -494,6 +494,12 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 .positiveText(R.string.aceptar)
                 .negativeText(R.string.cancelar)
                 .autoDismiss(false)
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -514,11 +520,13 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                                     .progress(true, 0)
                                     .show();
                         } else if (reasonSelected == -1) {
-                            RadioGroup radioGroup = (RadioGroup) custom.findViewById(R.id.radio_group);
-                            RadioButton last = (RadioButton) radioGroup.getChildAt(radioGroup.getChildCount() - 1);
-                            last.setError(getString(R.string.choose_reason));
+                            TextInputLayout radioContainer = (TextInputLayout) custom.findViewById(R.id.radio_group_container);
+                            radioContainer.setErrorEnabled(true);
+                            radioContainer.setError(getString(R.string.choose_reason));
                         } else {
-                            observacion.setError(getString(R.string.empty_field));
+                            TextInputLayout username_container = (TextInputLayout) custom.findViewById(R.id.username_container);
+                            username_container.setErrorEnabled(true);
+                            username_container.setError(getString(R.string.empty_field));
                         }
                     }
                 })
