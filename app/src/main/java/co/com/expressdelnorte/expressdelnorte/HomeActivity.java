@@ -99,10 +99,14 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         String total = "";
         if (message.has("cliente")) {
             cliente = ((JSONArray) message.get("cliente")).getJSONObject(0);
-            total = NumberFormat.getCurrencyInstance().format(message.get("total"));
+            if (message.has("total")) {
+                total = NumberFormat.getCurrencyInstance().format(message.get("total"));
+            }
         } else {
             cliente = message.getJSONObject("info").getJSONObject("cliente");
-            total = NumberFormat.getCurrencyInstance().format(message.getJSONObject("info").get("total_pedido"));
+            if (message.getJSONObject("info").has("total_pedido")) {
+                total = NumberFormat.getCurrencyInstance().format(message.getJSONObject("info").get("total_pedido"));
+            }
         }
 
         JSONObject tienda = ((JSONArray) message.get("tienda")).getJSONObject(0);
@@ -110,7 +114,10 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         String nombre = cliente.getString("nombre");
         String apellidos = cliente.getString("apellidos");
         String direccion = cliente.getString("direccion");
-        String telefono = cliente.getString("fijo");
+        String telefono = "";
+        if (cliente.has("fijo")) {
+            telefono = cliente.getString("fijo");
+        }
         String celular = cliente.getString("celular");
         String tiendaNombre = tienda.getString("referencia");
         String direccionTienda = tienda.getString("direccion");

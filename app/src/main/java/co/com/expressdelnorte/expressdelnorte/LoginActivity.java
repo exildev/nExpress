@@ -1,5 +1,6 @@
 package co.com.expressdelnorte.expressdelnorte;
 
+import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import co.com.expressdelnorte.expressdelnorte.notix.NotixFactory;
 public class LoginActivity extends AppCompatActivity implements AuthListener {
 
     private static final int PERMISSIONS_READ_PHONE_STATE = 2;
+    private static final int PERMISSIONS_CAMERA = 3;
     Notix notix;
 
     @Override
@@ -110,6 +112,16 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
     }
 
     public void qrScan(View view) {
+        qrScan();
+    }
+
+    private void qrScan() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_CAMERA);
+                return;
+            }
+        }
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setOrientationLocked(false);
         integrator.initiateScan();
@@ -201,6 +213,7 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
     private void initHome() {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void initNotix() {
@@ -233,6 +246,26 @@ public class LoginActivity extends AppCompatActivity implements AuthListener {
                         .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 validPermissions();
+                            }
+                        })
+                        .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                finish();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        } else if (requestCode == PERMISSIONS_CAMERA) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                qrScan();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.media_permissions_message)
+                        .setCancelable(false)
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                qrScan();
                             }
                         })
                         .setNegativeButton("Cerrar", new DialogInterface.OnClickListener() {
