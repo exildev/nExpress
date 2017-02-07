@@ -48,4 +48,9 @@
     <string name="notif_soat">"El soat se vencerá el %1$s"</string>
     <string name="notif_tecno">"La Tecnomecanica se vencerá el %1$s"</string>
     <string name="no_gps_permissions">No se pudo iniciar el servicio porque no hay permisos para el GPS</string>
+    <string name="title_activity_pedido">Información de pedido</string>
+    <string name="delivery_details_title">Detalles del pedido</string>
+    <string name="client_details_title">Datos de cliente</string>
+    <string name="item_list_title">Items por recojer</string>
+    <string name="details">Detalles</string>
 </resources>

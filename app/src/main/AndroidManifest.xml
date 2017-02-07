@@ -52,6 +52,11 @@
             android:name=".NotificationService"
             android:enabled="true"
             android:exported="false" />
+
+        <activity
+            android:name=".PedidoActivity"
+            android:label="@string/title_activity_pedido"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

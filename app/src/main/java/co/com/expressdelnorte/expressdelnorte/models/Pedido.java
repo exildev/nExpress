@@ -1,6 +1,8 @@
 package co.com.expressdelnorte.expressdelnorte.models;
 
 
+import org.json.JSONObject;
+
 public class Pedido {
     private int id;
     private int tipo;
@@ -14,6 +16,7 @@ public class Pedido {
     private String direccionTienda;
     private String total;
     private String message_id;
+    private JSONObject json;
 
     public Pedido(String total, String direccionTienda, String tienda, String celular, String telefono, String clienteApellidos, String clienteNombre, String direccion) {
         this.total = total;
@@ -28,6 +31,14 @@ public class Pedido {
 
     public Pedido() {
 
+    }
+
+    public JSONObject getJson() {
+        return json;
+    }
+
+    public void setJson(JSONObject json) {
+        this.json = json;
     }
 
     public String getEstado() {

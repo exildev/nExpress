@@ -135,6 +135,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         pedido.setTipo(tipo);
         pedido.setEstado(estado);
         pedido.setMessage_id(message_id);
+        pedido.setJson(message);
         return pedido;
     }
 
@@ -214,6 +215,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                     holder.total = (TextView) convertView.findViewById(R.id.total);
                     holder.negativeButton = (Button) convertView.findViewById(R.id.negative_button);
                     holder.positiveButton = (Button) convertView.findViewById(R.id.positive_button);
+                    holder.neutralButton = (Button) convertView.findViewById(R.id.neutral_button);
                     holder.dropImage = (ImageView) convertView.findViewById(R.id.drop_image);
                     holder.total_container = (LinearLayout) convertView.findViewById(R.id.total_container);
                     convertView.setTag(holder);
@@ -269,6 +271,14 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                                     cancelar(pedido, null);
                                     break;
                             }
+                        }
+                    });
+                    holder.neutralButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(HomeActivity.this, PedidoActivity.class);
+                            intent.putExtra("pedido", pedido.getJson().toString());
+                            startActivity(intent);
                         }
                     });
                     switch (pedido.getEstado()) {
@@ -492,6 +502,17 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
                 }
             }
         });
+    }
+
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        CursorLoader loader = new CursorLoader(this, contentUri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
     }
 
     private void cancelar(final Pedido pedido, final String foto) {
@@ -839,17 +860,6 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private String getRealPathFromURI(Uri contentUri) {
-        String[] proj = {MediaStore.Images.Media.DATA};
-        CursorLoader loader = new CursorLoader(this, contentUri, proj, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String result = cursor.getString(column_index);
-        cursor.close();
-        return result;
-    }
-
     static class ViewHolder {
         View button_expand;
         TextView cliente;
@@ -862,6 +872,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         TextView total;
         Button negativeButton;
         Button positiveButton;
+        Button neutralButton;
         ImageView dropImage;
         LinearLayout total_container;
     }
