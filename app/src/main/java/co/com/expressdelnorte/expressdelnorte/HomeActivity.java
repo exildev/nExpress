@@ -860,7 +860,7 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    static class ViewHolder {
+    private static class ViewHolder {
         View button_expand;
         TextView cliente;
         TextView direccionSubtitle;

@@ -234,7 +234,7 @@ public class Notix {
     private void initSocket() {
         messages = new ArrayList<>();
         try {
-            mSocket = IO.socket("http://104.236.33.228:4000");
+            mSocket = IO.socket("http://ec2-54-209-162-212.compute-1.amazonaws.com:4000");
             mSocket.on("identify", onIdentify);
             mSocket.on("success-login", onSuccesLogin);
             mSocket.on("error-login", onErrorLogin);
@@ -493,7 +493,7 @@ public class Notix {
                 .setErrorMessage("Hubo un error al subir la solucion")
                 .setCompletedMessage("Subida completada exitosamente en [[ELAPSED_TIME]]")
                 .setAutoClearOnSuccess(true);
-        String url = "http://104.236.33.228:4000/upload";
+        String url = "http://ec2-54-209-162-212.compute-1.amazonaws.com:4000/upload";
         try {
             new MultipartUploadRequest(context, url)
                     .setNotificationConfig(notificationConfig)
@@ -585,7 +585,7 @@ public class Notix {
                 .setErrorMessage("Hubo un error al subir la solucion")
                 .setCompletedMessage("Subida completada exitosamente en [[ELAPSED_TIME]]")
                 .setAutoClearOnSuccess(true);
-        String url = "http://104.236.33.228:4000/cancel";
+        String url = "http://ec2-54-209-162-212.compute-1.amazonaws.com:4000/cancel";
         try {
             new MultipartUploadRequest(context, url)
                     .setNotificationConfig(notificationConfig)
