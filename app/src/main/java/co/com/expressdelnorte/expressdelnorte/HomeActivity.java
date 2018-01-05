@@ -715,14 +715,14 @@ public class HomeActivity extends AppCompatActivity implements onNotixListener, 
     public void onNumeroPedido(JSONObject data) {
         try {
             notix.deleteMessage(data);
-            nPedidos = data.get("numero_pedidos").toString();
+            nPedidos = data.getInt("numero_pedidos") + "";
             Log.i("pedido", nPedidos);
-            Snackbar.make(findViewById(R.id.fab), "Has entregado " + nPedidos + " pedidos esta quincena", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.i("pedido", nPedidos);
+            nPedidos = "0";
         }
+        Snackbar.make(findViewById(R.id.fab), "Has entregado " + nPedidos + " pedidos esta quincena", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 
     @Override
